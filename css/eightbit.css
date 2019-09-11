@@ -18,11 +18,25 @@ canvas {
   background-color: #17163b;
 }
 
-button {
+button,
+label,
+input {
   color: black;
   padding: 11px 9px;
   border-radius: 10px;
   margin: 5px;
+  background-color: white;
+}
+
+input {
+  line-height: 1rem;
+  width: 100px;
+}
+
+label {
+  font-size: 0.5rem;
+  display: block;
+  width: 140px;
 }
 
 .title {
@@ -34,4 +48,14 @@ button {
 
 .title h1 {
   font-size: 15px;
+}
+
+button.facebookLogin {
+  background-color: transparent;
+  border: none;
+  padding: none;
+}
+.facebookLogin img {
+  width: 30px;
+  height: 30px;
 }

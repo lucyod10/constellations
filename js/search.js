@@ -14,6 +14,9 @@ let endSelect = false;
 
 // set up animation so user can start and stop algorithm.
 let animate;
+let diagonalWeight = 1.4;
+let frameRate = 0.1;
+let diagonal = true;
 
 const startBtn = document.getElementById("start");
 startBtn.addEventListener("click", function () {
@@ -23,7 +26,7 @@ startBtn.addEventListener("click", function () {
   if (endNode === undefined) {
     setEndNode(grid[30][30]);
   }
-  animate = setInterval(search, 0.0001);
+  animate = setInterval(search, frameRate);
   // let animate = window.requestAnimationFrame(search);
 });
 
@@ -43,6 +46,20 @@ const endSelectBtn = document.getElementById("endSelect");
 endSelectBtn.addEventListener("click", function () {
   startSelect = false;
   endSelect = true;
+});
+
+const updateBtn = document.getElementById("update");
+updateBtn.addEventListener("click", function () {
+  // get all the input fields, and apply them to the variables
+  diagonalWeightInput = document.getElementById("diagonalWeight").value;
+
+  diagonalInput = document.getElementById("diagonalBool").value;
+
+  frameRateInput = document.getElementById("frameRate").value;
+  diagonalWeight = Number(diagonalWeightInput);
+  frameRate = Number(frameRateInput);
+  diagonal = diagonalInput === "true" ? true : false;
+
 });
 
 // initialize grid
@@ -177,13 +194,10 @@ function setCurrent (bit) {
   current.status = "current";
   current.visited = true;
   current.show();
-  // openSet.push(current);
-  // current.openSetId = openSet.length - 1;
 }
 
 
 function findNeighbour(cur) {
-  let diagonal = false;
   // starting from the cur square
   // find its neighbours
   let neighbour_top, neighbour_left, neighbour_bottom, neighbour_right, neighbour_top_left, neighbour_top_right, neighbour_bottom_left, neighbour_bottom_right;
@@ -232,22 +246,22 @@ function findNeighbour(cur) {
   }
   if (diagonal) {
     if (neighbour_top_left) {
-      calculateNeighbour(neighbour_top_left, cur);
+      calculateNeighbour(neighbour_top_left, cur, diagonalWeight);
     }
     if (neighbour_top_right) {
-      calculateNeighbour(neighbour_top_right, cur);
+      calculateNeighbour(neighbour_top_right, cur, diagonalWeight);
     }
     if (neighbour_bottom_left) {
-      calculateNeighbour(neighbour_bottom_left, cur);
+      calculateNeighbour(neighbour_bottom_left, cur, diagonalWeight);
     }
     if (neighbour_bottom_right) {
-      calculateNeighbour(neighbour_bottom_right, cur);
+      calculateNeighbour(neighbour_bottom_right, cur, diagonalWeight);
     }
   }
 
 }
 
-function calculateNeighbour(neighbour, cur) {
+function calculateNeighbour(neighbour, cur, weight=1) {
   if (neighbour.visited === true) {
     // already been visited. Skip.
     return;
@@ -256,8 +270,8 @@ function calculateNeighbour(neighbour, cur) {
   neighbour.status = "open";
   neighbour.visited = true;
 
-  if (neighbour.distance === undefined || neighbour.distance > cur.distance + 1) {
-    neighbour.distance = cur.distance + 1;
+  if (neighbour.distance === undefined || neighbour.distance > cur.distance + weight) {
+    neighbour.distance = cur.distance + weight;
     neighbour.previous = cur;
   }
   neighbour.show();

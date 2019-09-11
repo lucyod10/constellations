@@ -11,6 +11,8 @@ window.addEventListener("mousemove", (event) => {
   mouse.x = event.x;
   mouse.y = event.y;
 });
+
+// TODO make resize
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -136,7 +138,7 @@ const starsRendered = [];
 
 canvas.addEventListener("click", function () {
   let x = event.pageX;
-  let y = event.pageY
+  let y = event.pageY;
 
   // check if click is in the location of a star
   starsRendered.forEach((star) => {
@@ -149,13 +151,16 @@ canvas.addEventListener("click", function () {
     if (y > y1 && y < y2 && x > x1 && x < x2) {
       console.log("star", x, y);
       if (startSelect === true) {
+        clearInterval(animate);
         setStartNode(grid[star[0]][star[1]]);
       }
       if (endSelect === true) {
+        clearInterval(animate);
         setEndNode(grid[star[0]][star[1]]);
       }
       startSelect = false;
       endSelect = false;
+
 
     }
   });
