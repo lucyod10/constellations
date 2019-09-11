@@ -1,30 +1,48 @@
-const canvas = document.querySelector("canvas");
-const c = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const w = 10;
 const cols = Math.floor(window.innerWidth / w);
 const rows = Math.floor(window.innerHeight / w);
+
 let grid = [];
 let current = null;
 
 let openSet = [];
-const closedSet = [];
-let startNode;
-let endNode;
+let closedSet = [];
+let currentPaths = [];
+let startNode = undefined;
+let endNode = undefined;
+let startSelect = false;
+let endSelect = false;
 
 // set up animation so user can start and stop algorithm.
 let animate;
 
 const startBtn = document.getElementById("start");
 startBtn.addEventListener("click", function () {
-  let animate = window.requestAnimationFrame(search);
+  if (startNode === undefined) {
+    setStartNode(grid[20][20]);
+  }
+  if (endNode === undefined) {
+    setEndNode(grid[30][30]);
+  }
+  animate = setInterval(search, 0.0001);
+  // let animate = window.requestAnimationFrame(search);
 });
 
 const stopBtn = document.getElementById("stop");
 stopBtn.addEventListener("click", function () {
-  window.cancelAnimationFrame(animate);
+  // window.cancelAnimationFrame(animate);
+  clearInterval(animate);
+});
+
+const startSelectBtn = document.getElementById("startSelect");
+startSelectBtn.addEventListener("click", function () {
+  startSelect = true;
+  endSelect = false;
+});
+
+const endSelectBtn = document.getElementById("endSelect");
+endSelectBtn.addEventListener("click", function () {
+  startSelect = false;
+  endSelect = true;
 });
 
 // initialize grid
@@ -42,11 +60,39 @@ function gridSetup() {
   canvas.height = rows * w;
 
   new Bit (1, 1, 1, '#c0ff33');
-  startNode = grid[20][20];
-  startNode.distance = 0;
-  endNode = grid[28][35];
-  endNode.show("red");
-  setCurrent(startNode);
+  init(0);
+}
+
+function setStartNode (node) {
+  openSet.forEach((s) => {
+    s.visited = false;
+    s.distance = Math.infinity;
+    s.previous = undefined;
+    s.openSetId = null;
+    s.status = "oldOpen"
+    s.show();
+  });
+  openSet = [];
+
+  closedSet.forEach((closed) => {
+    closed.visited = false;
+    closed.old_distance = closed.distance;
+    closed.distance = Math.infinity;
+    closed.previous = undefined;
+    closed.openSetId = null;
+    closed.status = "oldClosed";
+    closed.show();
+  });
+  closedSet = [];
+  startNode = node;
+  node.status = "start";
+  node.distance = 0;
+  setCurrent(node);
+}
+
+function setEndNode (node) {
+  endNode = node;
+  endNode.status = "end";
 }
 
 // Item class
@@ -57,36 +103,87 @@ function Item () {
   this.visited = false;
   this.openSetId = null;
   this.distance = Math.infinity;
+  this.old_distance = Math.infinity;
+  this.status = "none";
 
-  this.show = function(col) {
+  this.show = function() {
+
+    let col;
+    if (this.status === "path") {
+      col = "white";
+    }
+    else if (this.status === "end") {
+      col = "red";
+    }
+    else if (this.status === "start") {
+      col = "pink";
+    }
+    else if (this.status === "current") {
+      col = "#ffffff";
+    }
+    else if (this.status === "open") {
+      col= "#ffe166";
+    }
+    else if (this.status === "oldOpen") {
+      col = "#6f2561";
+    }
+    else if (this.status === "oldClosed") {
+      let colourArray = ["#482341", "#3e2039", "#282031", "#131019"]
+      const percent = rows/100;
+      if (this.old_distance < percent * 3) {
+        col = colourArray[0];
+      }
+      else if ( this.old_distance < percent * 5) {
+        col = colourArray[1];
+      }
+      else if ( this.old_distance < percent * 10) {
+        col = colourArray[2];
+      }
+      else if ( this.old_distance < percent * 20) {
+        col = colourArray[3];
+      }
+      else {
+        col = "black";
+      }
+    }
+    else if (this.status === "closed") {
+      let colourArray = ["#582c50", "#4e2648", "#332841", "#231a2f"]
+      const percent = rows/100;
+      if (this.distance < percent * 3) {
+        col = colourArray[0];
+      }
+      else if ( this.distance < percent * 5) {
+        col = colourArray[1];
+      }
+      else if ( this.distance < percent * 10) {
+        col = colourArray[2];
+      }
+      else if ( this.distance < percent * 20) {
+        col = colourArray[3];
+      }
+      else {
+        col = "black";
+      }
+    }
+    c.clearRect(this.x * w, this.y * w, w, w);
     Bit(this.x, this.y, 1, col);
   };
 
 }
 
-// function to create a square on the page.
-function Bit (top, left, width, col) {
-  // to keep the bits from overlapping- calculate top and left in terms of units (w)
-  top = top * w;
-  left = left * w;
-  width = width * w;
-  // draw the square
-  c.beginPath();
-  c.fillStyle = col;
-  c.fillRect(top, left, width, width);
-}
-
 // initialize the current node- set the colour and parameters.
 function setCurrent (bit) {
   current = bit;
-  bit.show("purple");
-
-  openSet.push(bit);
-  bit.openSetId = openSet.length - 1;
+  current.status = "current";
+  current.visited = true;
+  current.show();
+  // openSet.push(current);
+  // current.openSetId = openSet.length - 1;
 }
 
 
 function findNeighbour(cur) {
+  let diagonal = false;
   // starting from the cur square
   // find its neighbours
   let neighbour_top, neighbour_left, neighbour_bottom, neighbour_right, neighbour_top_left, neighbour_top_right, neighbour_bottom_left, neighbour_bottom_right;
@@ -105,101 +202,110 @@ function findNeighbour(cur) {
     neighbour_right = grid[cur.y][cur.x + 1];
   }
 
-  // // diagonals
-  // if (cur.x > 0 && cur.y > 0) {
-  //   neighbour_top_left = grid[cur.y - 1][cur.x - 1];
-  // }
-  // if (cur.x < cols - 1 && cur.y > 0) {
-  //   neighbour_top_right = grid[cur.y - 1][cur.x + 1];
-  // }
-  // if (cur.x > 0 && cur.y < rows - 1) {
-  //   neighbour_bottom_left = grid[cur.y + 1][cur.x - 1];
-  // }
-  // if (cur.x < cols - 1 && cur.y < rows - 1) {
-  //   neighbour_bottom_right = grid[cur.y + 1][cur.x + 1];
-  // }
+  // diagonals
+  if (diagonal) {
+    if (cur.x > 0 && cur.y > 0) {
+      neighbour_top_left = grid[cur.y - 1][cur.x - 1];
+    }
+    if (cur.x < cols - 1 && cur.y > 0) {
+      neighbour_top_right = grid[cur.y - 1][cur.x + 1];
+    }
+    if (cur.x > 0 && cur.y < rows - 1) {
+      neighbour_bottom_left = grid[cur.y + 1][cur.x - 1];
+    }
+    if (cur.x < cols - 1 && cur.y < rows - 1) {
+      neighbour_bottom_right = grid[cur.y + 1][cur.x + 1];
+    }
+  }
 
-  const showColour = "coral";
   if (neighbour_top) {
-    calculateNeighbour(neighbour_top, cur, showColour);
+    calculateNeighbour(neighbour_top, cur);
   }
   if (neighbour_left) {
-    calculateNeighbour(neighbour_left, cur, showColour);
+    calculateNeighbour(neighbour_left, cur);
   }
   if (neighbour_bottom) {
-    calculateNeighbour(neighbour_bottom, cur, showColour);
+    calculateNeighbour(neighbour_bottom, cur);
   }
   if (neighbour_right) {
-    calculateNeighbour(neighbour_right, cur, showColour);
+    calculateNeighbour(neighbour_right, cur);
   }
-  //
-  // if (neighbour_top_left) {
-  //   calculateNeighbour(neighbour_top_left, cur, showColour);
-  // }
-  // if (neighbour_top_right) {
-  //   calculateNeighbour(neighbour_top_right, cur, showColour);
-  // }
-  // if (neighbour_bottom_left) {
-  //   calculateNeighbour(neighbour_bottom_left, cur, showColour);
-  // }
-  // if (neighbour_bottom_right) {
-  //   calculateNeighbour(neighbour_bottom_right, cur, showColour);
-  // }
+  if (diagonal) {
+    if (neighbour_top_left) {
+      calculateNeighbour(neighbour_top_left, cur);
+    }
+    if (neighbour_top_right) {
+      calculateNeighbour(neighbour_top_right, cur);
+    }
+    if (neighbour_bottom_left) {
+      calculateNeighbour(neighbour_bottom_left, cur);
+    }
+    if (neighbour_bottom_right) {
+      calculateNeighbour(neighbour_bottom_right, cur);
+    }
+  }
+
 }
 
-function calculateNeighbour(bit, cur, showColour) {
-  if (bit.visited === true) {
+function calculateNeighbour(neighbour, cur) {
+  if (neighbour.visited === true) {
     // already been visited. Skip.
     return;
   }
   // check if neighbours have been visited.
-  bit.show(showColour);
-  bit.visited = true;
+  neighbour.status = "open";
+  neighbour.visited = true;
 
-  if (bit.distance === undefined || bit.distance > cur.distance + 1) {
-    bit.distance = cur.distance + 1;
-    bit.previous = cur;
+  if (neighbour.distance === undefined || neighbour.distance > cur.distance + 1) {
+    neighbour.distance = cur.distance + 1;
+    neighbour.previous = cur;
   }
-  console.log(bit.distance);
-  openSet.push(bit);
+  neighbour.show();
+  openSet.push(neighbour);
+  neighbour.openSetId = openSet.length - 1;
 }
 
 
 // the search algorithm - called by the start and stop functions above
 function search () {
-    // if current === end then we have finished.
-    if (current === endNode) {
-      // show path.
-      showPath(current);
-      return;
+  // if current === end then we have finished.
+  if (current === endNode) {
+    // show path.
+    endNode.previous = current.previous;
+    showPath(current);
+    return;
+  }
+  current.status = "closed";
+  closedSet.push(current);
+  current.show();
+  // find the neighbours of the current, and add them to open set with their distances updated.
+  findNeighbour(current);
+  // set current color to visited
+
+  // remove current from openset.
+  openSet = openSet.filter(function(value){
+    return value !== current;
+  });
+
+  // filter through openset, and find the smallest distance.
+  let smallest = undefined;
+  openSet.forEach((s) => {
+    if (smallest === undefined || smallest.distance > s.distance) {
+      smallest = s;
     }
-
-    // find the neighbours of the current, and add them to open set with their distances updated.
-    findNeighbour(current);
-    // set current color to visited
-    current.show("black");
-    // remove current from openset.
-    openSet = openSet.filter(function(value){
-      return value !== current;
-    });
-
-    // filter through openset, and find the smallest distance.
-    let smallest = undefined;
-    openSet.forEach((s) => {
-      if (smallest === undefined || smallest.distance > s.distance) {
-        smallest = s;
-      }
-    });
-    console.log(smallest);
-
-    setCurrent(smallest);
-    animate = window.requestAnimationFrame(search);
+  });
+  setCurrent(smallest);
 }
 
 function showPath(bit) {
-  console.log(bit);
   while (bit.previous !== undefined) {
-    bit.previous.show("white");
+    bit.previous.status = "path";
+    currentPaths.push(bit);
+    // remove current from openset.
+    closedSet = closedSet.filter(function(value){
+      return value !== bit;
+    });
+    bit.previous.show();
     bit = bit.previous;
   }
 }
@@ -207,60 +313,3 @@ function showPath(bit) {
 
 // initialize grid.
 gridSetup();
-
-
-// debugging - set up mock stars
-setBlockers(29, 39);
-setBlockers(28, 39);
-setBlockers(27, 38);
-setBlockers(26, 38);
-setBlockers(25, 37);
-setBlockers(24, 37);
-setBlockers(23, 36);
-setBlockers(22, 36);
-setBlockers(21, 35);
-
-setBlockers(29, 40);
-setBlockers(30, 40);
-setBlockers(31, 40);
-setBlockers(32, 40);
-setBlockers(33, 40);
-setBlockers(34, 40);
-setBlockers(35, 40);
-setBlockers(36, 40);
-setBlockers(37, 40);
-setBlockers(38, 40);
-setBlockers(39, 40);
-setBlockers(40, 40);
-setBlockers(41, 40);
-setBlockers(42, 40);
-setBlockers(43, 40);
-setBlockers(44, 40);
-setBlockers(45, 40);
-setBlockers(46, 40);
-
-setBlockers(47, 40);
-setBlockers(48, 40);
-setBlockers(49, 41);
-setBlockers(50, 42);
-setBlockers(50, 43);
-setBlockers(50, 44);
-
-function setBlockers(a, b) {
-  let one = grid[a][b];
-  one.visited = true;
-  one.show("limegreen");
-}
-
-(function initStars () {
-  let colours = ["#f6f64e", "#24e8f9", "#806fc8", "#5c76de"];
-  for (let i = 0; i < 900; i++) {
-    const top = Math.floor((Math.random() * rows));
-    const left = Math.floor((Math.random() * cols));
-    console.log(top, left, rows, cols);
-    const randomColour = colours[Math.round(Math.random() * (colours.length - 1))];
-    let one = grid[top][left];
-    one.visited = true;
-    one.show(randomColour);
-  }
-})();
