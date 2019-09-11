@@ -18,6 +18,12 @@ canvas {
   background-color: #17163b;
 }
 
+button {
+  color: black;
+  padding: 20px 10px;
+  border-radius: 10px;
+}
+
 .title {
   position: absolute;
   z-index: 20;

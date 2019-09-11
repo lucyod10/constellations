@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>8 bit</title>
+  </head>
+  <body>
+    <h1>insta</h1>
+  </body>
+
+  <script>
+  var url_string = window.location.href; //window.location.href
+  var url = new URL(url_string);
+  var c = url.searchParams.get("code");
+  console.log(c);
+    try
+      { window.opener.onInstagramAuth(c); }
+    catch (err)
+      {}
+    window.close();
+  </script>
+
+</html>
