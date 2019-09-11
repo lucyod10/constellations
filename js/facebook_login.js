@@ -1,6 +1,6 @@
 window.fbAsyncInit = function() {
   FB.init({
-    appId      : 'APP-ID',
+    appId      : app_id,
     cookie     : true,
     xfbml      : true,
     version    : 'v4.0'
@@ -101,15 +101,15 @@ function onInstagramAuth(code)
   //   -F 'code=CODE' \
 
   console.log((JSON.stringify({
-      client_id: 'ID',
-      client_secret: 'SECRET',
+      client_id: client_id,
+      client_secret: client_secret,
       grant_type: 'authorization_code',
       redirect_uri: redirect_uri,
       code: code
   })));
 
-  const formData = `client_id=ID` +
-  `&client_secret=SECRET` +
+  const formData = `client_id=${client_id}` +
+  `&client_secret=${client}` +
   `&grant_type=authorization_code` +
   `&redirect_uri=${redirect_uri}` +
   `&code=${code}`;
