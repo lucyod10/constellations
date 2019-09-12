@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>8 bit</title>
+    <link rel="stylesheet" href="css/eightbit.css">
+  </head>
+  <body>
+    <div class="title">
+      <h1>My Constellation</h1>
+      <button id="fb_login"  class="facebookLogin"><img src="./images/facebook_icon.png"></button>
+
+      <button id="random"  class="facebookLogin"><img src="./images/random_icon.png"></button>
+
+
+      <button id="fb_refresh">fb Refresh</button>
+      <button id="fb_logout">fb Logout</button><br>
+      <!-- <button id="insta_login">Insta Login</button>
+      <button id="insta_refresh">Insta Refresh</button><br> -->
+
+      <button id="start">start</button>
+      <button id="stop">stop</button>
+
+      <button id="startSelect">select start</button>
+      <button id="endSelect">select end</button><br>
+      <div class="settings">
+        <label for="frameRate">
+          FrameRate
+          <input type="number" id="frameRate" value="0.1" />
+        </label>
+
+        <label for="diagonalBool">
+          diagonal
+          <input type="text" id="diagonalBool" value="true" />
+        </label>
+
+        <label for="diagonalWeight">
+          diagonalWeight
+          <input type="number" id="diagonalWeight" value="1.4" />
+        </label>
+
+        <button id="update">Update</button>
+      </div>
+
+    </div>
+    <canvas></canvas>
+  </body>
+  <script src="js/facebook_login.js"></script>
+  <script src="js/eightbit.js"></script>
+  <script src="js/search_bidirectional.js"></script>
+
+</html>

@@ -1,4 +1,4 @@
-const palette = {
+const palette_1 = {
   white: "white",
 
   blue_one: '#1a1a27',
@@ -27,11 +27,40 @@ const palette = {
   star_med_dark: "#48495f",
 }
 
+const palette = {
+  white: "white",
+
+  blue_one: '#2c2c41',
+  blue_two: '#2c2c41',
+  blue_three: '#373754',
+  blue_four: '#3f3f60',
+  blue_five: '#434369',
+
+  starOne_yellow: '#ffec68',
+  starOne_orange: '#ce7531',
+  starOne_aqua: "#24e8f9",
+  starOne_blue: "#0499e1",
+
+  sky_one: "#30305f",
+  sky_two: "#2a2a56",
+  sky_three: "#25254d",
+  sky_four: "#272755",
+
+  bit_yellow: "#f6f64e",
+  bit_aqua: "#24e8f9",
+  bit_lavender: "#806fc8",
+  bit_purple: "#5c76de",
+
+  star_med_pale: "#e1dfee",
+  star_med_med: "#afabc3",
+  star_med_dark: "#48495f",
+}
+
 
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
 
-const w = 3;
+const w = 5;
 
 let mouse = {
   x: undefined,
@@ -52,7 +81,7 @@ window.addEventListener("resize", () => {
 function Bit (top, left, width, col, visited=false) {
   if (grid !== undefined && visited === true) {
     if (grid.length > left && grid[0].length > top) {
-      grid[left][top].visited = true;
+      grid[left][top].star = true;
     }
   }
   // to keep the bits from overlapping- calculate top and left in terms of units (w)
@@ -193,8 +222,6 @@ function starClickEvent () {
         }
         startSelect = false;
         endSelect = false;
-
-
       }
     });
   });
