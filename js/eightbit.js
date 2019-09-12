@@ -1,3 +1,33 @@
+const palette = {
+  white: "white",
+
+  blue_one: '#1a1a27',
+  blue_two: '#1e1e2d',
+  blue_three: '#1e1e2d',
+  blue_four: '#212131',
+  blue_five: '#232335',
+
+  starOne_yellow: '#ffec68',
+  starOne_orange: '#ce7531',
+  starOne_aqua: "#24e8f9",
+  starOne_blue: "#0499e1",
+
+  sky_one: "#1a1a27",
+  sky_two: "#191925",
+  sky_three: "#1a1a29",
+  sky_four: "#171723",
+
+  bit_yellow: "#f6f64e",
+  bit_aqua: "#24e8f9",
+  bit_lavender: "#806fc8",
+  bit_purple: "#5c76de",
+
+  star_med_pale: "#e1dfee",
+  star_med_med: "#afabc3",
+  star_med_dark: "#48495f",
+}
+
+
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
 
@@ -14,8 +44,8 @@ window.addEventListener("mousemove", (event) => {
 
 // TODO make resize
 window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth - 200;
+  canvas.height = window.innerHeight - 200;
   init();
 });
 
@@ -71,7 +101,7 @@ function StarMedium (left, top, colour1, colour2, colour3) {
 }
 
 function NightSky () {
-  let colours = ["#1a1a27", "#191925", "#1a1a29", "#171723"];
+  let colours = [palette.sky_one, palette.sky_two, palette.sky_three, palette.sky_four];
   let row = window.innerWidth / w;
   let col = window.innerHeight / w;
   for (let i = 0; i < row; i++) {
@@ -110,16 +140,16 @@ function init (friend_count) {
   for (let i = 0; i < starOneCount; i++) {
     const top = Math.round(Math.random() * screenHeight);
     const left = Math.round(Math.random() * screenWidth);
-    let star = new Star(left, top, "#24e8f9", "#0499e1");
+    let star = new Star(left, top, palette.starOne_aqua, palette.starOne_blue);
   }
 
   for (let i = 0; i < starTwoCount; i++) {
     const top = Math.round(Math.random() * screenHeight);
     const left = Math.round(Math.random() * screenWidth);
-    let star = new Star(left, top, "#ffec68", "#ce7531");
+    let star = new Star(left, top, palette.starOne_yellow, palette.starOne_orange);
   }
 
-  let colours = ["#f6f64e", "#24e8f9", "#806fc8", "#5c76de"];
+  let colours = [palette.bit_yellow, palette.bit_aqua, palette.bit_lavender, palette.bit_purple];
   for (let i = 0; i < smallStarCount; i++) {
     const top = Math.round((Math.random() * screenHeight));
     const left = Math.round((Math.random() * screenWidth));
@@ -130,38 +160,42 @@ function init (friend_count) {
   for (let i = 0; i < medStarCount; i++) {
     const top = Math.round(Math.random() * screenHeight);
     const left = Math.round(Math.random() * screenWidth);
-    let star = new StarMedium(left, top, "#e1dfee", "#afabc3", "#48495f");
+    let star = new StarMedium(left, top, palette.star_med_pale, palette.star_med_med, palette.star_med_dark);
   }
+
+  starClickEvent();
 }
 
 const starsRendered = [];
 
-canvas.addEventListener("click", function () {
-  let x = event.pageX;
-  let y = event.pageY;
+function starClickEvent () {
+  canvas.addEventListener("click", function () {
+    let x = event.pageX;
+    let y = event.pageY;
 
-  // check if click is in the location of a star
-  starsRendered.forEach((star) => {
-    // star = [top, left, width];
-    const x1 = star[1] * w;
-    const x2 = (star[1] + star[2]) * w;
-    const y1 = star[0] * w;
-    const y2 = (star[0] + star[2]) * w;
+    // check if click is in the location of a star
+    starsRendered.forEach((star) => {
+      // star = [top, left, width];
+      const x1 = star[1] * w;
+      const x2 = (star[1] + star[2]) * w;
+      const y1 = star[0] * w;
+      const y2 = (star[0] + star[2]) * w;
 
-    if (y > y1 && y < y2 && x > x1 && x < x2) {
-      console.log("star", x, y);
-      if (startSelect === true) {
-        clearInterval(animate);
-        setStartNode(grid[star[0]][star[1]]);
+      if (y > y1 && y < y2 && x > x1 && x < x2) {
+        console.log("star", x, y);
+        if (startSelect === true) {
+          clearInterval(animate);
+          setStartNode(grid[star[0]][star[1]]);
+        }
+        if (endSelect === true) {
+          clearInterval(animate);
+          setEndNode(grid[star[0]][star[1]]);
+        }
+        startSelect = false;
+        endSelect = false;
+
+
       }
-      if (endSelect === true) {
-        clearInterval(animate);
-        setEndNode(grid[star[0]][star[1]]);
-      }
-      startSelect = false;
-      endSelect = false;
-
-
-    }
+    });
   });
-});
+}

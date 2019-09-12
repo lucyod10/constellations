@@ -1,3 +1,7 @@
+const state = {
+  loggedIn: false,
+}
+
 window.fbAsyncInit = function() {
   FB.init({
     appId      : '412375039632627',
@@ -18,6 +22,9 @@ window.fbAsyncInit = function() {
  }(document, 'script', 'facebook-jssdk'));
 
 
+ const randomise = document.getElementById("random");
+ randomise.addEventListener("click", randomise_stars);
+
  const fb_login = document.getElementById("fb_login");
  fb_login.addEventListener("click", facebook_login);
 
@@ -26,9 +33,28 @@ window.fbAsyncInit = function() {
 
  const fb_logout = document.getElementById("fb_logout");
  fb_logout.addEventListener("click", facebook_logout);
+
+ function updateUI () {
+   if (state.loggedIn === true) {
+     fb_login.style.display = 'none';
+     fb_refresh.style.display = 'block';
+     fb_logout.style.display = 'block';
+   }
+   else {
+     fb_login.style.display = 'inline-block';
+     fb_refresh.style.display = 'none';
+     fb_logout.style.display = 'none';
+   }
+ }
  //
  // const insta_login = document.getElementById("insta_login");
  // insta_login.addEventListener("click", login_insta);
+
+function randomise_stars() {
+  const num = Math.floor(Math.random() * 1000) + 100;
+  console.log(num);
+  gridSetup(num);
+};
 
 function facebook_login() {
   FB.login(function(response) {
@@ -37,9 +63,13 @@ function facebook_login() {
       // Logged into your webpage and Facebook.
       const user_id = response.authResponse.userID;
       get_friends(user_id);
+      state.loggedIn = true;
+      updateUI();
     } else {
       // The person is not logged into your webpage or we are unable to tell.
       console.log("not logged in");
+      state.loggedIn = false;
+      updateUI();
     }
   }, {scope: 'user_friends,instagram_basic,pages_show_list,manage_pages,instagram_manage_insights'});
 };
@@ -50,14 +80,23 @@ function facebook_check_state() {
       // Logged into your webpage and Facebook.
       const user_id = response.authResponse.userID;
       get_friends(user_id);
+      state.loggedIn = true;
+      updateUI();
+    }
+    else {
+      state.loggedIn = false;
+      updateUI();
     }
   });
-}
+
+};
 
 function facebook_logout () {
   FB.logout(function(response) {
-   // Person is now logged out
-   console.log(response);
+    //logout
+    state.loggedIn = false;
+    updateUI();
+    init(0);
   });
 }
 
@@ -70,7 +109,7 @@ function get_friends(user_id) {
       function(response) {
           // Insert your code here
           console.log(response.summary.total_count);
-          init(response.summary.total_count);
+          gridSetup(response.summary.total_count);
       }
     );
   }

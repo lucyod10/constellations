@@ -16,6 +16,9 @@ body {
 
 canvas {
   background-color: #17163b;
+  position: absolute;
+  right: 200px;
+  top: 0px;
 }
 
 button,
@@ -42,8 +45,11 @@ label {
 .title {
   position: absolute;
   z-index: 20;
-  top: 20px;
-  left: 20px;
+  top: 0px;
+  right: 0px;
+  width: 200px;
+  height: 100%;
+  background-color: #1a1a29;
 }
 
 .title h1 {
@@ -54,6 +60,7 @@ button.facebookLogin {
   background-color: transparent;
   border: none;
   padding: none;
+  display: inline-block;
 }
 .facebookLogin img {
   width: 30px;
