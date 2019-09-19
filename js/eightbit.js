@@ -1,4 +1,4 @@
-const palette_1 = {
+const palette = {
   white: "white",
 
   blue_one: '#1a1a27',
@@ -27,7 +27,7 @@ const palette_1 = {
   star_med_dark: "#48495f",
 }
 
-const palette = {
+const palette_1 = {
   white: "white",
 
   blue_one: '#2c2c41',
@@ -60,7 +60,7 @@ const palette = {
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
 
-const w = 5;
+const w = 3;
 
 let mouse = {
   x: undefined,

@@ -39,7 +39,6 @@ stopBtn.addEventListener("click", function () {
     clearInterval(animate);
     animating = false;
   }
-
 });
 
 const startSelectBtn = document.getElementById("startSelect");
@@ -120,7 +119,7 @@ function setEndNode (node) {
   endNode.status = "end";
 }
 
-// Item class
+// An item is what the grid is made up of. The settings in here handle how the algorithm works
 function Item () {
   this.x;
   this.y;
@@ -130,6 +129,7 @@ function Item () {
   this.distance = Math.infinity;
   this.old_distance = Math.infinity;
   this.status = "none";
+  this.star = false;
 
   this.show = function() {
 
@@ -272,6 +272,9 @@ function calculateNeighbour(neighbour, cur, weight=1) {
     // already been visited. Skip.
     return;
   }
+  if (neighbour.star) {
+    return;
+  }
 
   if (neighbour.status === "oldClosed") {
     weight = weight + 5;
@@ -335,7 +338,6 @@ function showPath(bit) {
     bit = bit.previous;
   }
 }
-
 
 // initialize grid.
 gridSetup();
